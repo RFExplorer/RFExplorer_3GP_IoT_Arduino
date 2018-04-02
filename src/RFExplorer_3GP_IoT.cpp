@@ -1,6 +1,6 @@
 //============================================================================
 //RF Explorer 3G+ IoT for Arduino - A Spectrum Analyzer for everyone!
-//Copyright � 2010-17 Ariel Rocholl, www.rf-explorer.com
+//Copyright � 2010-18 Ariel Rocholl, www.rf-explorer.com
 //
 //This application is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -98,14 +98,14 @@ void RFExplorer_3GP_IoT::changeNumberSteps(uint16_t nSteps)
     switch (nSteps)
     {
         case 112:
-        sendCommand("#\x05" "CP" "\x06");
+        sendCommand("#\x05" "CJ" "\x06");
         break;
         case 240:
-        sendCommand("#\x05" "CP" "\x0E");
+        sendCommand("#\x05" "CJ" "\x0E");
         break;
         default:
         case 512:
-        sendCommand("#\x05" "CP" "\xFF");
+        sendCommand("#\x05" "CJ" "\x1F");
         break;
     }  
 }    
@@ -174,16 +174,18 @@ uint8_t RFExplorer_3GP_IoT::processReceivedString_GetNextLine()
 
     if(m_CircularBuffer.getSize() > 0)
     {
-        if ( m_nCharCounter < 3) //Catch first header received characters
+        if (m_nCharCounter < 4) 
         {
+            //Catch first header received characters from Circular Buffer to ensure that RF Explorer command is recognized
+            //Critical code because it is dependant of external loop
             cBufferRead = m_CircularBuffer.get();
             if ((m_nCharCounter!=0) || ((m_nCharCounter==0) && (('#' == cBufferRead) || ('$' == cBufferRead))))
             {
-                strcat(m_pLine, cBufferRead);
+                strcat(m_pLine + m_nCharCounter, cBufferRead);
                 m_nCharCounter++;
             }
         }
-        if (m_nCharCounter >= 3)
+        if (m_nCharCounter >= 4)
         {
             if('#' == m_pLine[0]) //#xxxx
             {
@@ -194,7 +196,7 @@ uint8_t RFExplorer_3GP_IoT::processReceivedString_GetNextLine()
                 }
                 while (bContinue && ('\r' != cBufferRead) && (m_nCharCounter < STRING_SIZE))
                 {
-                    strcat(m_pLine,cBufferRead);
+                    strcat(m_pLine + m_nCharCounter,cBufferRead);
                     m_nCharCounter++;
                     if (m_CircularBuffer.getSize()==0)
                     {
@@ -220,9 +222,21 @@ uint8_t RFExplorer_3GP_IoT::processReceivedString_GetNextLine()
             }
             else if('$' == m_pLine[0]) //$xxxx
             {
-                if (('s' == m_pLine[1]) || ('S' == m_pLine[1]))
+                if (('s' == m_pLine[1]) || ('S' == m_pLine[1]) || ('z' == m_pLine[1]))
                 {
                     uint16_t nMaxLengthMessage = m_pLine[2];
+                    if (m_pLine[1] == 's')
+                    {
+                        if (nMaxLengthMessage == 0)
+                            nMaxLengthMessage = 256;
+                            
+                        nMaxLengthMessage = (uint16_t)(nMaxLengthMessage * 16);
+                    }
+                    else if (m_pLine[1] == 'z')
+                    {
+                        nMaxLengthMessage *= 256;
+                        nMaxLengthMessage += m_pLine[3];
+                    }
                     if (nMaxLengthMessage <= MAX_SPECTRUM_STEPS)
                     {
                         bool bContinue = (m_CircularBuffer.getSize() > 0);
@@ -232,7 +246,7 @@ uint8_t RFExplorer_3GP_IoT::processReceivedString_GetNextLine()
                         }
                         while(bContinue && ('\r' != cBufferRead) && (m_nCharCounter < STRING_SIZE))
                         {
-                            strcat(m_pLine,cBufferRead);
+                            strcat(m_pLine + m_nCharCounter,cBufferRead);
                             m_nCharCounter++;
                             if (m_CircularBuffer.getSize() == 0)
                             {

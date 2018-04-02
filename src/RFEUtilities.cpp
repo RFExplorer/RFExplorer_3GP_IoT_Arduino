@@ -1,6 +1,6 @@
 //============================================================================
 //RF Explorer 3G+ IoT for Arduino - A Spectrum Analyzer for everyone!
-//Copyright © 2010-17 Ariel Rocholl, www.rf-explorer.com
+//Copyright © 2010-18 Ariel Rocholl, www.rf-explorer.com
 //
 //This application is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -26,8 +26,7 @@ boolean StartWith(char*pLine, const char* pLineCompare)
 
 char * strcat(char * pLine, char cCharacter)
 {
-    uint16_t nSizeString = strlen(pLine);
-    pLine[nSizeString] = cCharacter;
-    pLine[nSizeString + 1] = '\0';
+    pLine[0] = cCharacter;
+    pLine[1] = '\0';
     return pLine;
 }

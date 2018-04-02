@@ -1,6 +1,6 @@
 //============================================================================
 //RF Explorer 3G+ IoT for Arduino - A Spectrum Analyzer for everyone!
-//Copyright © 2010-17 Ariel Rocholl, www.rf-explorer.com
+//Copyright © 2010-18 Ariel Rocholl, www.rf-explorer.com
 //
 //This application is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -46,12 +46,21 @@ uint8_t RFESweepData::processReceivedString(char* pLine, uint8_t* pLastMessage)
     uint8_t nReturnCode = _RFE_SUCCESS;
 
     uint16_t nSizeString = strlen(pLine);
+    uint8_t nAmplitudePosition = 3;
+    
+    //Note that pLine[2] may contains 0x00
+    if ('z' == pLine[1])
+    {
+        nSizeString = strlen(pLine + 4) + 4;
+        nAmplitudePosition = 4;
+    }        
 
     if (nSizeString >= 2) 
     {
-        if ((StartWith(pLine,"$s") && (nSizeString - 3 == (pLine[2] * 16))) || (StartWith(pLine,"$S") && (nSizeString - 3 == pLine[2])))
+        if ((StartWith(pLine,"$s") && (nSizeString - 3 == (pLine[2] * 16))) || (StartWith(pLine,"$S") && (nSizeString - 3 == pLine[2]))
+            || (StartWith(pLine,"$z") && (nSizeString - 4 == (pLine[3] + pLine[2] * 256))))
         {
-            memcpy(m_arrAmplitude, pLine + 3, m_nTotalSteps);
+            memcpy(m_arrAmplitude, pLine + nAmplitudePosition, m_nTotalSteps);
             m_bValid = true;
             *pLastMessage = _SWEEP_MESSAGE;
         }

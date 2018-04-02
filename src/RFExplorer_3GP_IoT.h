@@ -1,6 +1,6 @@
 //============================================================================
 //RF Explorer 3G+ IoT for Arduino - A Spectrum Analyzer for everyone!
-//Copyright � 2010-17 Ariel Rocholl, www.rf-explorer.com
+//Copyright � 2010-18 Ariel Rocholl, www.rf-explorer.com
 //
 //Contributed by:
 //       Manuel Ballesteros
@@ -40,7 +40,7 @@
 #define MONITOR_SERIAL
 
 #define _HEADER_LIB_3GP  "---RFExplorer 3G+ IoT Arduino---"
-#define _VERSION_LIB_3GP "-------Library v1.0.1701.1------"
+#define _VERSION_LIB_3GP "-------Library v1.0.1804.1------"
 
 //IOT RF Explorer is only supported by Arduino DUE  
 //and Seeeduino UNO (currently version 4.2) platforms, 
@@ -82,19 +82,20 @@ class RFExplorer_3GP_IoT
 //------------------------- Private Attributes---------------------------------
 
     private:
-    // Objects for storage configuration and data of RFE
+    //Objects for storage configuration and data of RFE
     RFEConfiguration m_objRFEConfiguration;
     RFESweepData m_objRFESweepData;
 
-    // Circular buffer for Rx data of RFExplorer 3G+ IoT
+    //Circular buffer for Rx data of RFExplorer 3G+ IoT
     ByteBuffer_RFE m_CircularBuffer;
     
     //String of message received from RFExplorer 3G+ IoT
     char m_pLine[STRING_SIZE];
+    //Critical counter of characters received in string message
     uint16_t m_nCharCounter;
 
 
-    //Number of error process at the beginning
+    //Number of errors from the beginning
     uint16_t m_nCounterError;
 
     //Current Baud rate
@@ -121,7 +122,7 @@ class RFExplorer_3GP_IoT
     //Returns: 0 if is possible to process otherwise ErrorCodes.
     uint8_t processReceivedString_GetNextLine();
     
-    //Clean m_pLine and allows new process
+    //Clean string message and allows new process
     void LineBufferInit();
  
 //------------------------- Public Methods ------------------------------------   
@@ -131,8 +132,8 @@ class RFExplorer_3GP_IoT
     //Call this function one time at the beginning.
     void init();
 
-    // Hardware restart to RF Explorer RFExplorer 3G+ IoT
-    // It place Reset pin of RFExplorer 3GP IoT at low level for a certain time.
+    //Hardware restart to RF Explorer RFExplorer 3G+ IoT
+    //It place Reset pin of RFExplorer 3GP IoT at low level for a certain time.
     void resetHardware() const;
      
     //Change RF Explorer UART module communication baud rate. The change is immediate and it is lost after a reset.
@@ -146,7 +147,7 @@ class RFExplorer_3GP_IoT
     //Recommended for Seeeduino - 240 steps
     void changeNumberSteps(uint16_t nSteps);
         
-    // Request RF Explorer command to receive Current_Config from RFExplorer 3G+ IoT
+    //Request RF Explorer command to receive Current_Config from RFExplorer 3G+ IoT
     void requestConfig();
 
     //It will change current configuration for RF.
@@ -201,9 +202,9 @@ class RFExplorer_3GP_IoT
     //Returns object system to use methods and properties of RFE_SweepData class.
     RFESweepData* getSweepData();
 
-    //Access to internal Software serial using for task debugging.
+    //Access to internal serial using for task debugging.
     //Different use between Arduino Due or Seeeduino
-    //See in definition of object m_objDebugSerialPort   
+    //See in definition of object m_objMonitorSerial   
     #if defined MONITOR_SERIAL
         #if defined (_SAM3XA_)
             HardwareSerial& getMonitorSerial() const;

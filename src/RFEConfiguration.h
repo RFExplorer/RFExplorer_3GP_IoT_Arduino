@@ -1,6 +1,6 @@
 //============================================================================
 //RF Explorer 3G+ IoT for Arduino - A Spectrum Analyzer for everyone!
-//Copyright � 2010-17 Ariel Rocholl, www.rf-explorer.com
+//Copyright � 2010-18 Ariel Rocholl, www.rf-explorer.com
 //
 //This application is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -35,8 +35,10 @@ enum eModel
     MODEL_2400,     //4
     MODEL_WSUB3G,   //5
     MODEL_6G,       //6
+    
+    MODEL_WSUB1G_PLUS = 10,  //10
 
-    MODEL_RFGEN=60, //60
+    MODEL_RFGEN = 60, //60
     MODEL_NONE = 0xFF //0xFF
 };
 
@@ -53,11 +55,11 @@ enum eMode
 enum eCalculator
 {
     NORMAL = 0,
-    MAX = 1,
-    AVG = 2,
-    OVERWRITE = 3,
-    MAX_HOLD = 4,
-    MAX_HISTORICAL = 5,
+    MAX,
+    AVG,
+    OVERWRITE,
+    MAX_HOLD,
+    MAX_HISTORICAL,
     UNKNOWN = 0xff
 };
 
