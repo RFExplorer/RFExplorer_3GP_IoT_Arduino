@@ -1,6 +1,6 @@
 //============================================================================
 //RF Explorer 3G+ IoT for Arduino - A Spectrum Analyzer for everyone!
-//Copyright © 2010-18 Ariel Rocholl, www.rf-explorer.com
+//Copyright ï¿½ 2010-18 Ariel Rocholl, www.rf-explorer.com
 //
 //This application is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -16,8 +16,8 @@
 //License along with this library; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //=============================================================================
+#include "RFExplorer_3GP_IoT.h"
 
-#include "RFESweepData.h"
 
 uint32_t RFESweepData::getFrequencyKHZ(uint16_t nStep) const
 {
@@ -83,35 +83,53 @@ int16_t RFESweepData::getAmplitudeDBM(uint16_t nStep) const
 {
     if (nStep < m_nTotalSteps)
     {
-        return ((int16_t)(m_arrAmplitude[nStep] + 1)/-2);
+		return adjustAmplitudeDBM(m_arrAmplitude[nStep]);
     }
     else
     {
         return MIN_AMPLITUDE_DBM;
-    }        
-}
-
-void RFESweepData::setAmplitudeDBM(uint16_t nStep, int8_t nDBM)
-{
-    if (nStep < m_nTotalSteps)
-    {
-        m_arrAmplitude[nStep] = nDBM;
-    }        
+    }       
 }
 
 uint16_t RFESweepData::getPeakStep() const
 {
     uint16_t nStep = 0;
-    byte nPeak = 255;
-    
+    int16_t nPeak = -150;
+	int16_t nAdjustedAmplitudeDB = -150;
+
     for (uint16_t nInd = 0; nInd < m_nTotalSteps; nInd++)
     {
-        if (nPeak > m_arrAmplitude[nInd])
+		nAdjustedAmplitudeDB = adjustAmplitudeDBM(m_arrAmplitude[nInd]);
+        if (nPeak < nAdjustedAmplitudeDB)
         {
-            nPeak = m_arrAmplitude[nInd];
+            nPeak = nAdjustedAmplitudeDB;
             nStep = nInd;
         }
     }
     
     return nStep;
 }
+
+int16_t RFESweepData::adjustAmplitudeDBM(byte nAmplitudeByte) const
+{
+	int16_t nTempAmplitude = nAmplitudeByte;
+	int16_t nAmplitudeDB = nAmplitudeByte;
+	//MWSUB3G firmware compensates internally the input stage attenuation and due to limitation of byte variable (0-256) we need to fix externally before storing in int16 variable
+	//For LNA we can get amplitude data below 128 causing overflow.
+	//For ATT we know amplitude data above 180 are real positive amplitude values.
+	if((*m_peInputStage == LNA_25dB) && (nTempAmplitude <= 30))
+	{
+		nAmplitudeDB = ((nTempAmplitude + 1) + 256)/-2;
+	}
+	else if((*m_peInputStage == Attenuator_30dB) && (nTempAmplitude > 180))
+	{
+		nAmplitudeDB = (256 - (nTempAmplitude + 1))/2;
+	}
+	else
+	{
+		nAmplitudeDB = (nTempAmplitude + 1)/-2;
+	}
+
+	return nAmplitudeDB;
+}
+

@@ -23,13 +23,12 @@
 //=============================================================================
 
 #if defined(ARDUINO) && ARDUINO >= 100
-#include "Arduino.h"
+//#include "Arduino.h"
 #else
 #include "WProgram.h"
 #endif
 
 #include "RFExplorer_3GP_IoT.h"
-#include "ByteBuffer_RFE.h"
 
 ByteBuffer_RFE::ByteBuffer_RFE()
 {

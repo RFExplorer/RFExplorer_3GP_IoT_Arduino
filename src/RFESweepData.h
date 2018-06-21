@@ -1,6 +1,6 @@
 //============================================================================
 //RF Explorer 3G+ IoT for Arduino - A Spectrum Analyzer for everyone!
-//Copyright © 2010-18 Ariel Rocholl, www.rf-explorer.com
+//Copyright ï¿½ 2010-18 Ariel Rocholl, www.rf-explorer.com
 //
 //This application is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
@@ -41,6 +41,8 @@ class RFESweepData
     //Variable defining whether object RFESweepData contains valid data for processing
     boolean m_bValid;
 
+	enum eInputStage* m_peInputStage = NULL;
+
     public:
     RFESweepData()
     {
@@ -48,6 +50,10 @@ class RFESweepData
         m_bValid = false;
         memset(m_arrAmplitude,0x0,sizeof(m_arrAmplitude));
     }
+	void setReferenceInputStage(enum eInputStage* peInputStage)
+	{
+		m_peInputStage = peInputStage;
+	};
 
     //obtain current frequency of select step on current configuration
     uint32_t getFrequencyKHZ(uint16_t nStep) const;
@@ -65,11 +71,6 @@ class RFESweepData
     //nStep: Internal frequency step or bucket to read data from
     //Returns: Value in dBm
     int16_t getAmplitudeDBM(uint16_t nStep) const;
-
-    // Storage amplitude data in dBm.
-    //nStep: Number of step
-    //nDBM: Value in dBm for that step of frequency
-    void setAmplitudeDBM(uint16_t nStep, int8_t nDBM);
     
     //Returns the step of the highest amplitude value found
     uint16_t getPeakStep() const;
@@ -90,6 +91,14 @@ class RFESweepData
     //Get/Set Number of sweep steps with values which follows
     uint16_t getTotalSteps() const { return m_nTotalSteps;}
     void setTotalSteps(uint16_t nTotalSteps) { m_nTotalSteps = nTotalSteps; }
+
+	private:
+	//-------------------------Private functions-----------------
+	//Adjust amplitude dB when input stage is LNA or ATT for compensating byte overflow
+	//nAmplitudeByte: amplitude value in byte
+	//Returns: amplitude value in dBm
+	int16_t adjustAmplitudeDBM(byte nAmplitudeByte) const;
+
 };
 
 #endif

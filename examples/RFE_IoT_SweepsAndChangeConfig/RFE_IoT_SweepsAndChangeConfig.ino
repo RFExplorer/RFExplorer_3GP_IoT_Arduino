@@ -1,7 +1,7 @@
 /*
 
   RF Explorer 3G+ IoT for Arduino - A Spectrum Analyzer for everyone!
-  Copyright © 2010-17 Ariel Rocholl, www.rf-explorer.com
+  Copyright © 2010-18 Ariel Rocholl, www.rf-explorer.com
   
   This sketch is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -10,7 +10,7 @@
   
   -----------------------------------------------------------------
   
-  Example: RFE_IoT_SweepsAndChangeConfig - Version 1.0.0 - 2016/12/01
+  Example: RFE_IoT_SweepsAndChangeConfig - Version 1.1 - 2018/06/21
 
   General Description: 
     Capture signals for electromagnetic spectrum with RF Explorer 3G+ IoT that is required to study. 
@@ -57,7 +57,8 @@ void setup()
     delay(1000);                        //Wait 1sec to stablish communication
     digitalWrite(_RFE_GPIO2, HIGH);     
     pinMode(_RFE_GPIO2, INPUT_PULLUP);  //Set _RFE_GPIO2 as a general port, no longer needed after start completed
-    
+
+    //g_objRF.SetInputStage(LNA_25dB);  	//Uncomment this line to configure input stage. Use Direct, Attenuator_30dB or LNA_25dB. Device always boots in Direct mode.
     g_objRF.requestConfig();            //Request of current configuration to 3G+ -> Device starts to send it setup and them SweepData
 }
 void loop() 

@@ -35,6 +35,7 @@ void RFExplorer_3GP_IoT::init()
 {
     m_nCounterError = 0;
     m_nBaudrate = DEF_BAUD_RATE;
+	m_eInputStage = Direct;
 
     memset(m_pLine,0x0,sizeof(m_pLine));
     m_nCharCounter = 0;
@@ -177,7 +178,7 @@ uint8_t RFExplorer_3GP_IoT::processReceivedString_GetNextLine()
         if (m_nCharCounter < 4) 
         {
             //Catch first header received characters from Circular Buffer to ensure that RF Explorer command is recognized
-            //Critical code because it is dependant of external loop
+            //Critical code because it depends on external loop
             cBufferRead = m_CircularBuffer.get();
             if ((m_nCharCounter!=0) || ((m_nCharCounter==0) && (('#' == cBufferRead) || ('$' == cBufferRead))))
             {
@@ -185,8 +186,27 @@ uint8_t RFExplorer_3GP_IoT::processReceivedString_GetNextLine()
                 m_nCharCounter++;
             }
         }
+		if (m_nCharCounter == 3)
+		{
+			if(('#' == m_pLine[0]) && ('a' == m_pLine[1]) ) //#ax
+			{
+				 switch((byte)(m_pLine[2] - 0x30))
+				 {
+					default:
+					case 0:
+						m_eInputStage = Direct;
+					break;
+					case 1:
+						m_eInputStage = Attenuator_30dB;
+					break;
+					case 2:
+						m_eInputStage = LNA_25dB;
+					break;
+				 }
+			}
+		}
         if (m_nCharCounter >= 4)
-        {
+        {		
             if('#' == m_pLine[0]) //#xxxx
             {
                 bool bContinue=(m_CircularBuffer.getSize()>0);
@@ -221,9 +241,9 @@ uint8_t RFExplorer_3GP_IoT::processReceivedString_GetNextLine()
                 }
             }
             else if('$' == m_pLine[0]) //$xxxx
-            {
+            {				
                 if (('s' == m_pLine[1]) || ('S' == m_pLine[1]) || ('z' == m_pLine[1]))
-                {
+                {				
                     uint16_t nMaxLengthMessage = m_pLine[2];
                     if (m_pLine[1] == 's')
                     {
@@ -286,16 +306,16 @@ uint8_t RFExplorer_3GP_IoT::processReceivedString_GetNextLine()
 uint8_t RFExplorer_3GP_IoT::processReceivedString()
 {
     uint8_t nReturnCode = processReceivedString_GetNextLine();
-
+		
     if (nReturnCode == _RFE_SUCCESS)
     {
-        m_nLastMessage = _UNKNOWN_MESSAGE;
+		m_nLastMessage = _UNKNOWN_MESSAGE;
         if (m_objRFEConfiguration.processReceivedString(m_pLine, &m_nLastMessage) == _RFE_SUCCESS) //Is object Config
         {
 			nReturnCode = _RFE_SUCCESS; 
             
 			if (m_nLastMessage == _CONFIG_MESSAGE)
-			{
+			{				
 				m_objRFESweepData.setValidSweep(false);       
 				if (m_objRFEConfiguration.isValidConfig() == true)
 				{
@@ -313,9 +333,9 @@ uint8_t RFExplorer_3GP_IoT::processReceivedString()
 			}
         }
         else if (m_objRFESweepData.processReceivedString(m_pLine, &m_nLastMessage) == _RFE_SUCCESS)
-        {
+        {		
             if (m_objRFEConfiguration.isValidConfig() == true)
-            {
+            {				
                 nReturnCode = _RFE_SUCCESS;
             }
             else
@@ -366,6 +386,35 @@ RFESweepData* RFExplorer_3GP_IoT::getSweepData()
 {
     return (&m_objRFESweepData);
 }
+
+void RFExplorer_3GP_IoT::SetInputStage(enum eInputStage eNewInputStage)
+{
+	switch (eNewInputStage)
+	{
+		case Attenuator_30dB:
+		{
+			sendCommand("#\x04" "a1"); //#<Size>a1
+		}
+		break;
+		case LNA_25dB:
+		{
+			sendCommand("#\x04" "a2"); //#<Size>a2
+		}
+		break;
+		default:
+		case Direct:
+		{
+			sendCommand("#\x04" "a0"); //#<Size>a0
+		}
+		break;
+	}
+}
+
+enum eInputStage RFExplorer_3GP_IoT::GetInputStage()
+{
+	return m_eInputStage;
+}
+
 
 #if defined MONITOR_SERIAL
     #if defined (_SAM3XA_)

@@ -1,7 +1,7 @@
 /*
 
   RF Explorer 3G+ IoT for Arduino - A Spectrum Analyzer for everyone!
-  Copyright © 2010-17 Ariel Rocholl, www.rf-explorer.com
+  Copyright © 2010-18 Ariel Rocholl, www.rf-explorer.com
   
   This sketch is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -10,7 +10,7 @@
   
   -----------------------------------------------------------------
   
-  Example: RFE_IoT_GetPeak - Version 1.0.0 - 2016/12/01
+  Example: RFE_IoT_GetPeak - Version 1.1 - 2018/06/21
 
   General Description: 
     Simplest example with RF Explorer 3G+ IoT capturing external Signal Peak.
@@ -49,7 +49,8 @@ void setup()
     delay(1000);                        //Wait 1sec to stablish communication
     digitalWrite(_RFE_GPIO2, HIGH);     
     pinMode(_RFE_GPIO2, INPUT_PULLUP);  //Set _RFE_GPIO2 as a general port, no longer needed after start completed
-    
+                
+    //g_objRF.SetInputStage(LNA_25dB);  ///Uncomment this line to configure input stage. Use Direct, Attenuator_30dB or LNA_25dB. Device always boots in Direct mode.
     g_objRF.requestConfig();            //Request of current configuration to 3G+ -> Device starts to send it setup and them SweepData
 }
 
@@ -69,6 +70,12 @@ void loop()
             //Message received is a new configuration from 3G+
             //We show new Start/Stop KHZ range here from the new configuration
             g_objRF.getMonitorSerial().println("New Config");
+            
+            g_objRF.getMonitorSerial().print("Firmware:  "); 
+            g_objRF.getMonitorSerial().println(g_objRF.getConfiguration()->getRFExplorerFirmware()); 
+            g_objRF.getMonitorSerial().print("Model:  "); 
+            g_objRF.getMonitorSerial().println(g_objRF.getConfiguration()->getMainBoardModel()); 
+
             g_objRF.getMonitorSerial().print("StartKHz: "); 
             g_objRF.getMonitorSerial().println(g_objRF.getConfiguration()->getStartKHZ());
             g_objRF.getMonitorSerial().print("StopKHz:  "); 

@@ -17,7 +17,7 @@
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //=============================================================================
 
-#include "RFEUtilities.h"
+#include "RFExplorer_3GP_IoT.h"
 
 boolean StartWith(char*pLine, const char* pLineCompare)
 {
