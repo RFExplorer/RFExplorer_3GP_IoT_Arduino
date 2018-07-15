@@ -6,7 +6,7 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-RFExplorer_3GP_IoT	KEYWORD1	RFExplorer_3GP_IoT
+RFExplorer_3GP_IoT	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
